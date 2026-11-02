@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------------ User ---
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password   String // bcrypt hash — never a plain password
+  securityQuestion   String?
+  securityAnswerHash String? // bcrypt hash of a normalized answer — never returned
+  sessionVersion     Int     @default(0) // increments on recovery to invalidate user JWTs
+  name      String?
+  phone     String?   // E.164 format, e.g. +16722206808
+  whatsapp  String?   // WhatsApp number in E.164 format
+  status    String    @default("active") // active | suspended
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLoginAt DateTime?
+
+  wallet      Wallet?
+  transactions Transaction[]
+  holdings    Holding[]
+  notifications NotificationDelivery[]
+  passwordResets PasswordReset[]
+
+  @@index([status, createdAt])
+}
+
+// ------------------------------------------------------------ Account -----/
+// User-scoped financial records for the dashboard. Rows are only ever
+// written from authenticated, user-scoped API flows; balances are never
+// credited without a verified payment (see finance.controller.js).
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Float    @default(0) // available cash in `currency`
+  currency  String   @default("INR")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Deposit / withdrawal ledger. `status` starts as `pending` and is only
+// moved to `completed` by a verified payment/processing flow (none connected
+// yet — the API never self-completes or self-credits).
+model Transaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // deposit | withdrawal
+  amount    Float // always positive; direction is implied by `type`
+  status    String   @default("pending") // pending | processing | completed | failed | rejected
+  method    String? // deposit payment method, e.g. bank_transfer
+  reference String? @unique // outward-facing reference, e.g. XPO-DEP-...
+  details   Json? // masked details only — never full account numbers
+
+  // Admin review trail (Part 3 finance). `reviewedBy` stores the acting
+  // admin's EMAIL (never tokens/secrets); rejection always records a reason.
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([type, status, createdAt])
+}
+
+// Investment positions feeding "Invested" and P/L on the dashboard.
+// Nothing in the app creates holdings yet (no investment execution is
+// connected), so new users have zero rows and the summary reports ₹0.00.
+model Holding {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol         String
+  name           String
+  kind           String // crypto | forex
+  investedAmount Float // cost basis
+  currentValue   Float // latest valuation
+  prevCloseValue Float // value at previous close (today's P/L baseline)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@unique([userId, symbol])
+}
+
+// ------------------------------------------------------------------ Admin --
+
+model Admin {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String // bcrypt hash — never a plain password
+  name      String?
+  role      String    @default("superadmin")
+  status    String    @default("active")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLoginAt DateTime?
+}
+
+// ---------------------------------------------------------------- Market ---
+
+model Market {
+  id       String        @id @default(cuid())
+  symbol   String // e.g. EURUSD
+  pair     String? // e.g. EUR/USD (display)
+  name     String // e.g. Euro / US Dollar
+  provider String // forex | crypto
+  category String // Forex | Crypto
+  active   Boolean       @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  prices MarketPrice[]
+
+  @@unique([provider, symbol])
+  @@index([provider, active])
+}
+
+// Latest + historical quotes written by the scheduler (cache of record).
+model MarketPrice {
+  id        String   @id @default(cuid())
+  marketId  String
+  market    Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  provider  String // forex | crypto
+  price     Float
+  bid       Float?
+  ask       Float?
+  fetchedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([marketId, fetchedAt])
+  @@index([provider, fetchedAt])
+}
+
+// One row per outbound provider request (IBRLive, crypto, ...).
+model ApiUsage {
+  id             String   @id @default(cuid())
+  provider       String // ibrlive | crypto
+  endpoint       String
+  success        Boolean
+  httpStatus     Int?
+  responseTimeMs Int?
+  error          String?
+  createdAt      DateTime @default(now())
+
+  @@index([provider, createdAt])
+  @@index([createdAt])
+}
+
+// ----------------------------------------------------------- System/Audit --
+
+model SystemLog {
+  id        String   @id @default(cuid())
+  level     String // info | warn | error
+  source    String // scheduler | ibrlive | crypto | api | auth ...
+  message   String
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([level, createdAt])
+  @@index([source, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String // admin.login, user.status_update, ...
+  actor      String // actor email
+  actorRole  String?
+  entityType String?
+  entityId   String?
+  details    Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action, createdAt])
+}
+
+// ------------------------------------------------------------- Notifications
+// In-app notification store: creation, delivery status, read/unread state,
+// scheduling and per-user targeting.
+//
+// No email/push/SMS provider is configured, so delivery is tracked as an
+// internal "queued" state. Providers are plugged in later without schema
+// changes; when a provider is configured, an admin-initiated send sets
+// status "sent" only after the provider confirms delivery.
+model Notification {
+  id            String   @id @default(cuid())
+  title         String
+  body          String
+  type          String   @default("general") // general | deposit_status | withdrawal_status | announcement
+  target        String   @default("all") // all | selected | individual
+  recipientIds  String?  // comma-separated user IDs (only for target="selected" or "individual")
+  data          Json?    // arbitrary payload (e.g. { transactionId })
+  scheduledAt   DateTime?
+  status        String   @default("draft") // draft | scheduled | sent | failed | read
+  retryCount    Int      @default(0)
+  deliveredAt   DateTime?
+  lastError     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Delivery confirmation rows — one per user per notification.
+  deliveries    NotificationDelivery[]
+
+  @@index([status, createdAt])
+  @@index([scheduledAt])
+}
+
+model NotificationDelivery {
+  id            String   @id @default(cuid())
+  notification  Notification @relation(fields: [notificationId], references: [id])
+  notificationId String
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        String   // queued | sent | failed | read
+  deliveredAt   DateTime?
+  lastError     String?
+  createdAt     DateTime  @default(now())
+
+  @@unique([notificationId, userId])
+  @@index([userId, createdAt])
+}
+
+// ----------------------------------------------------------- Password resets
+// Secure password recovery: hashed, expiring, single-use tokens, admin
+// revocation, and an audited account-recovery flow.
+model PasswordReset {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash     String   @unique // pending marker or bcrypt temporary-password hash — never plaintext
+  status        String   @default("pending") // pending | approved | rejected | locked | used | revoked
+  approvedAt    DateTime?
+  approvedBy    String?
+  temporaryUsedAt DateTime?
+  rejectedAt    DateTime?
+  rejectedBy    String?
+  securityAttempts Int  @default(0)
+  lockedAt      DateTime?
+  expiresAt     DateTime
+  used          Boolean  @default(false)
+  usedAt        DateTime?
+  revokedAt     DateTime?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime  @default(now())
+
+  @@index([used, expiresAt])
+  @@index([userId, createdAt])
+}
+

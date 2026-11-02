@@ -1,0 +1,61 @@
+/* --------------------------------------------------------- page heading -- */
+
+.more__head {
+  padding-top: 16px;
+}
+
+.more__title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+}
+
+.more__sub {
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------- responsive -- */
+
+@media (min-width: 768px) {
+  .more__title {
+    font-size: 30px;
+  }
+}
+
+/* ------------------------------------------------------------ menu rows -- */
+
+.more__btn {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Avatar-style icon for the Profile row (mirrors the header avatar). */
+.more__ico {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--bright), var(--primary));
+  border: 1px solid rgba(59, 130, 246, 0.55);
+}
+
+/* Spans inside the button need block flow (row name/sub default to <p>). */
+.more__btn .row__name,
+.more__btn .row__sub {
+  display: block;
+}
+
+.more__btn:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}

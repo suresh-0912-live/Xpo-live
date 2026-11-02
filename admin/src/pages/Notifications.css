@@ -1,0 +1,37 @@
+.notification-composer {
+  margin-bottom: 16px;
+}
+
+.notification-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.notification-form-actions,
+.notification-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.notification-form-actions {
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.notification-preview {
+  max-width: 34rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 3px;
+}
+
+@media (max-width: 720px) {
+  .notification-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}

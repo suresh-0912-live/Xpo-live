@@ -1,0 +1,26 @@
+/* --------------------------------------------------------- page heading -- */
+
+.txn__head {
+  padding-top: 16px;
+}
+
+.txn__title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  line-height: 1.15;
+}
+
+.txn__sub {
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------- responsive -- */
+
+@media (min-width: 768px) {
+  .txn__title {
+    font-size: 30px;
+  }
+}

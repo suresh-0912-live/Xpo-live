@@ -1,0 +1,218 @@
+/* Shared styles for the Login and Sign up pages. */
+
+.auth {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background:
+    radial-gradient(900px 460px at 50% -8%, rgba(37, 99, 235, 0.25), transparent 62%),
+    var(--bg);
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 32px 26px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(7, 24, 45, 0.95), rgba(6, 18, 37, 0.95));
+  box-shadow: 0 18px 50px rgba(2, 8, 23, 0.55);
+}
+
+.auth__brand {
+  display: flex;
+  justify-content: center;
+}
+
+.auth__brand .hdr__logo {
+  width: 132px;
+  height: auto;
+}
+
+.auth__title {
+  margin: 0;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+
+.auth__sub {
+  margin: -10px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth__field span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.auth__field input {
+  height: 48px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  background: rgba(2, 8, 23, 0.6);
+  color: var(--white);
+  font-size: 16px; /* prevents iOS zoom-on-focus */
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth__field input::placeholder {
+  color: var(--muted-dim);
+}
+
+.auth__field input:focus {
+  border-color: rgba(59, 130, 246, 0.75);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+.auth__error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 59, 92, 0.4);
+  background: rgba(255, 59, 92, 0.12);
+  color: #ff8fa3;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.auth__success {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 229, 160, 0.35);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 229, 160, 0.1);
+  color: #7bf0c5;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.auth__submit {
+  height: 48px;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--bright), var(--primary));
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.auth__submit:hover {
+  filter: brightness(1.08);
+}
+
+.auth__submit:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.auth__submit:focus-visible,
+.auth__link:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+.auth__switch {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.auth__link {
+  color: #60a5fa;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.auth__link:hover {
+  text-decoration: underline;
+}
+
+.auth__whatsapp {
+  display: block;
+  margin-top: 2px;
+  text-align: center;
+}
+
+.auth__hint {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted-dim);
+}
+
+/* ---------------------------------------------------------- splash ------- */
+
+.auth--splash {
+  gap: 14px;
+}
+
+.auth__splash {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.auth__spinner {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto;
+  border-radius: 50%;
+  border: 3px solid rgba(59, 130, 246, 0.25);
+  border-top-color: var(--bright);
+  animation: auth-spin 0.8s linear infinite;
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------------------------------- small screens --- */
+
+@media (max-width: 359px) {
+  .auth {
+    padding: 16px 12px;
+  }
+
+  .auth__card {
+    padding: 26px 18px;
+  }
+}

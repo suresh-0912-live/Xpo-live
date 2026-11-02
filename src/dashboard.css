@@ -1,0 +1,993 @@
+/* ---------------------------------------------------------------- shell -- */
+
+.shell {
+  /* Shared responsive foundation token. Overridden by the media queries at
+     the bottom of this file; the fixed bottom nav inherits it from here. */
+  --shell-max: 430px;
+
+  width: 100%;
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  min-height: 100svh;
+  background: var(--bg);
+  position: relative;
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+  overflow-x: hidden;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: 0 var(--pad) 8px;
+}
+
+/* --------------------------------------------------------------- header -- */
+
+.hdr {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--pad);
+  background: linear-gradient(
+      115deg,
+      rgba(37, 99, 235, 0.28) 0%,
+      rgba(2, 8, 23, 0) 46%
+    ),
+    rgba(2, 8, 23, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.hdr__logo {
+  width: 110px;
+  height: 30px;
+  display: block;
+}
+
+.hdr__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hdr__bell {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.14);
+  border: 1px solid var(--border);
+}
+
+.hdr__dot {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--neg);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+.hdr__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--bright), var(--primary));
+  border: 1px solid rgba(59, 130, 246, 0.55);
+}
+
+.hdr__search {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.14);
+  border: 1px solid var(--border);
+  color: #bfdbfe;
+}
+
+/* ------------------------------------------------------------- greeting -- */
+
+.greet {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px var(--pad) 0;
+}
+
+.greet__hi {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.greet__name {
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.greet__sub {
+  font-size: 12.5px;
+  color: var(--muted-dim);
+  margin-top: 3px;
+}
+
+.greet__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  background: rgba(37, 99, 235, 0.14);
+  color: #bfdbfe;
+}
+
+.pill--live {
+  color: var(--pos);
+}
+
+.pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pos);
+  box-shadow: 0 0 8px rgba(0, 229, 160, 0.9);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.pill--currency {
+  background: rgba(2, 8, 23, 0.7);
+}
+
+.pill__caret {
+  display: inline-flex;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------- hero ------- */
+
+.hero {
+  margin-top: 2px;
+  padding: 14px 14px 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    170deg,
+    var(--card-2) 0%,
+    var(--card) 55%,
+    #04101f 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(59, 130, 246, 0.16),
+    0 10px 26px -14px var(--glow);
+  overflow: hidden;
+}
+
+.hero__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hero__value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -1.1px;
+  line-height: 1.08;
+}
+
+.hero__cents {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.hero__delta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.hero__filters {
+  display: flex;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.tf {
+  flex: 1;
+  height: 26px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+  background: rgba(2, 8, 23, 0.55);
+  border: 1px solid var(--border-soft);
+}
+
+.tf--on {
+  color: #fff;
+  background: var(--bright);
+  border-color: var(--bright);
+  box-shadow: 0 4px 12px -4px rgba(0, 102, 255, 0.85);
+}
+
+.chart {
+  margin: 6px -14px 0;
+  display: block;
+  width: calc(100% + 28px);
+  height: 92px;
+}
+
+/* -------------------------------------------------------- summary cards -- */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.scard {
+  padding: 9px 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: linear-gradient(165deg, var(--card-2), var(--card));
+}
+
+.scard__ico {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  color: #93c5fd;
+  background: rgba(37, 99, 235, 0.16);
+  border: 1px solid var(--border-soft);
+}
+
+.scard__ico--pos {
+  color: var(--pos);
+  background: rgba(0, 229, 160, 0.12);
+  border-color: rgba(0, 229, 160, 0.22);
+}
+
+.scard__label {
+  margin-top: 7px;
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: var(--muted-dim);
+}
+
+.scard__value {
+  margin-top: 3px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+
+.scard__pct {
+  margin-top: 1px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------- summary responsive --- */
+/* 4 nowrap currency values need ~390px of row width. On phones, tighten the
+   card metrics so the row fits edge-to-edge without clipping, and stack the
+   cards 2x2 on tiny screens (mirrors the Markets <=359px rule). */
+
+@media (max-width: 430px) {
+  .summary {
+    gap: 6px;
+  }
+
+  .scard {
+    padding: 9px 6px 10px;
+  }
+}
+
+@media (min-width: 360px) and (max-width: 430px) {
+  .scard__value {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 359px) {
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* --------------------------------------------------------- quick actions -- */
+
+.qa {
+  padding: 12px 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(7, 24, 45, 0.9), rgba(6, 18, 37, 0.9));
+}
+
+.qa__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.qac {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 4px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  background: var(--card);
+  font-size: 11px;
+  font-weight: 600;
+  color: #dbeafe;
+}
+
+.qac--primary {
+  background: linear-gradient(140deg, var(--bright), var(--primary));
+  border-color: rgba(0, 102, 255, 0.7);
+  box-shadow: 0 8px 18px -10px rgba(0, 102, 255, 0.95);
+  color: #fff;
+}
+
+.qac__ico {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+}
+
+/* --------------------------------------------------------- section head -- */
+
+.shead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 2px 0;
+}
+
+.shead__title {
+  font-size: 17.5px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.shead__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+/* ---------------------------------------------------------------- rails -- */
+
+.rail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0 var(--pad) 4px;
+  margin: 0 calc(var(--pad) * -1);
+  scrollbar-width: none;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+.rail > * {
+  scroll-snap-align: start;
+}
+
+/* ------------------------------------------------------- market cards ---- */
+
+.mcard {
+  flex: 0 0 138px;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: linear-gradient(165deg, var(--card-2), var(--card));
+}
+
+.mcard__top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.mcard__sym {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.mcard__spark {
+  margin: 8px 0 2px;
+  display: block;
+  width: 100%;
+  height: 26px;
+}
+
+.mcard__price {
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.mcard__chg {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.mcard__pair {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--muted-dim);
+}
+
+/* --------------------------------------------------------- index cards --- */
+
+.icard {
+  flex: 0 0 190px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: linear-gradient(170deg, var(--card-2), var(--card));
+  display: flex;
+  flex-direction: column;
+}
+
+.icard__icons {
+  display: flex;
+  align-items: center;
+}
+
+.icard__icons > * + * {
+  margin-left: -6px;
+}
+
+.ibadge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  border: 2px solid var(--card);
+}
+
+.ibadge--sm {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
+.icard__name {
+  margin-top: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+}
+
+.icard__ret {
+  margin-top: 7px;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+
+.icard__retlabel {
+  font-size: 10.5px;
+  color: var(--muted-dim);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.risk {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.risk--high {
+  color: #ff8fa3;
+  background: rgba(255, 59, 92, 0.16);
+  border: 1px solid rgba(255, 59, 92, 0.32);
+}
+
+.risk--medium {
+  color: var(--warn);
+  background: rgba(245, 185, 68, 0.14);
+  border: 1px solid rgba(245, 185, 68, 0.3);
+}
+
+.icard__cta {
+  margin-top: 10px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #fff;
+  background: linear-gradient(120deg, var(--bright), var(--primary));
+  box-shadow: 0 8px 16px -10px rgba(0, 102, 255, 0.95);
+}
+
+/* --------------------------------------------------------------- lists --- */
+
+.panel {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(7, 24, 45, 0.92), rgba(6, 18, 37, 0.92));
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+}
+
+.row + .row {
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.row__ico {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.row__ico--blue {
+  background: rgba(37, 99, 235, 0.18);
+  border: 1px solid var(--border);
+}
+
+.row__ico--pos {
+  color: var(--pos);
+  background: rgba(0, 229, 160, 0.14);
+  border: 1px solid rgba(0, 229, 160, 0.24);
+}
+
+.row__ico--neg {
+  color: var(--neg);
+  background: rgba(255, 59, 92, 0.14);
+  border: 1px solid rgba(255, 59, 92, 0.24);
+}
+
+.row__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.row__name {
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row__sub {
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--muted-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row__right {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.row__value {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.row__chg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 1px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.row__chev {
+  flex: 0 0 auto;
+  color: var(--muted-dim);
+  display: inline-flex;
+}
+
+/* --------------------------------------------------------------- colors -- */
+
+.pos {
+  color: var(--pos);
+}
+
+.neg {
+  color: var(--neg);
+}
+
+.muted {
+  color: var(--muted-dim);
+}
+
+.spark-pos {
+  fill: none;
+  stroke: var(--pos);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.spark-neg {
+  fill: none;
+  stroke: var(--neg);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.spark {
+  display: block;
+  width: 100%;
+  height: 26px;
+}
+
+/* ---------------------------------------------------------- bottom nav --- */
+
+.nav {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  z-index: 40;
+  width: 100%;
+  /* Inherited from the .shell ancestor; fallback keeps standalone usage safe. */
+  max-width: var(--shell-max, 430px);
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: rgba(2, 8, 23, 0.95);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border);
+}
+
+.nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  color: #7f96b8;
+}
+
+.nav__item--on {
+  color: var(--bright);
+}
+
+.nav__ico {
+  display: grid;
+  place-items: center;
+  height: 22px;
+}
+
+.nav__item--on .nav__ico {
+  filter: drop-shadow(0 0 7px rgba(0, 102, 255, 0.85));
+}
+
+/* ========================================== responsive foundation ======== */
+/* Shared shell/nav width ladder for Home, Transactions, More and Profile.
+   Values mirror the Markets shell (Markets.css) so every page scales
+   identically: mobile stays 430px, then 600 / 720 / 960 / 1120.
+   Token changes are scoped to .shell so page CSS (and Markets) is untouched. */
+
+@media (min-width: 640px) {
+  .shell {
+    --shell-max: 600px;
+    --pad: 20px;
+    --gap: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .shell {
+    --shell-max: 720px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    --shell-max: 960px;
+    --pad: 24px;
+    --gap: 20px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .shell {
+    --shell-max: 1120px;
+  }
+}
+
+/* -------------------------------------------------- dashboard notices -- */
+
+.dashnotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--muted-dim);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dashnotice--error {
+  border-color: rgba(255, 59, 92, 0.35);
+  background: rgba(255, 59, 92, 0.12);
+  color: #ffb3c0;
+}
+
+.dashnotice__btn {
+  flex: 0 0 auto;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: #dbeafe;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.row--empty {
+  color: var(--muted-dim);
+  font-size: 12.5px;
+}
+
+/* ------------------------------------------------------- action sheet -- */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(2, 8, 23, 0.66);
+  backdrop-filter: blur(3px);
+}
+
+.sheet {
+  width: 100%;
+  max-width: var(--shell-max, 430px);
+  max-height: 88svh;
+  overflow-y: auto;
+  padding: 16px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border);
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(180deg, rgba(9, 26, 50, 0.98), rgba(6, 18, 37, 0.99));
+  animation: sheet-in 160ms ease-out;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sheet__title {
+  font-size: 16.5px;
+  font-weight: 700;
+}
+
+.sheet__close {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.sheet__sub,
+.sheet__note {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted-dim);
+  line-height: 1.5;
+}
+
+.sheet__form {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field__label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #9fb6d4;
+}
+
+.field__input {
+  height: 40px;
+  padding: 0 11px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(2, 8, 23, 0.5);
+  color: #e6eefc;
+  font-size: 14px;
+}
+
+.field__input:focus {
+  outline: none;
+  border-color: rgba(0, 102, 255, 0.7);
+}
+
+.field__input:disabled {
+  opacity: 0.6;
+}
+
+.sheet__msg {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.sheet__msg--ok {
+  background: rgba(0, 229, 160, 0.12);
+  border: 1px solid rgba(0, 229, 160, 0.3);
+  color: #7dffd4;
+}
+
+.sheet__msg--err {
+  background: rgba(255, 59, 92, 0.12);
+  border: 1px solid rgba(255, 59, 92, 0.32);
+  color: #ffb3c0;
+}
+
+.sheet__actions,
+.sheet__choices {
+  display: flex;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.btn {
+  flex: 1;
+  height: 40px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #fff;
+}
+
+.btn--primary {
+  background: linear-gradient(120deg, var(--bright), var(--primary));
+  border: 1px solid rgba(0, 102, 255, 0.7);
+}
+
+.btn--ghost {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: #dbeafe;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+}
