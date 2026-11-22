@@ -60,7 +60,6 @@ model Transaction {
   status    String   @default("pending") // pending | processing | completed | failed | rejected
   method    String? // deposit payment method, e.g. bank_transfer
   reference String? @unique // outward-facing reference, e.g. XPO-DEP-...
-  referenceNumber Int? @unique // 5-digit display reference, e.g. 12345
   details   Json? // masked details only — never full account numbers
 
   // Admin review trail (Part 3 finance). `reviewedBy` stores the acting

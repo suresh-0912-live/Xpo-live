@@ -3,6 +3,7 @@ import BottomNavigation from '../components/BottomNavigation.jsx'
 import MobileHeader from '../components/MobileHeader.jsx'
 import { createDeposit, createWithdrawal, DEPOSIT_METHODS, fetchSummary, fetchTransactions } from '../api/finance.js'
 import { navItemsFor } from '../data/dashboardData.js'
+import { transactionWhatsAppLink } from '../utils/whatsapp.js'
 import '../dashboard.css'
 import './Finance.css'
 
@@ -20,7 +21,7 @@ function formatDate(value) {
   return value ? new Date(value).toLocaleString() : '—'
 }
 
-export default function Finance({ onNavigate }) {
+export default function Finance({ onNavigate, user }) {
   const [panel, setPanel] = useState('wallet')
   const [summary, setSummary] = useState(null)
   const [transactions, setTransactions] = useState([])
@@ -121,6 +122,16 @@ export default function Finance({ onNavigate }) {
           </section>
         )}
         {notice && <p className="finance-notice" role="status">{notice}</p>}
+        {submittedRequest && (
+          <a
+            className="finance-whatsapp"
+            href={transactionWhatsAppLink({ user, transaction: submittedRequest })}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Review request in WhatsApp
+          </a>
+        )}
 
         {panel !== 'wallet' && (
           <form className="finance-form" onSubmit={submit}>
@@ -159,8 +170,9 @@ export default function Finance({ onNavigate }) {
           {!loading && !error && rows.length === 0 && <p className="finance-state">No {panel === 'wallet' ? 'wallet activity' : panel} yet.</p>}
           {rows.map((row) => (
             <article className="finance-row" key={row.id}>
-              <div><strong>{row.type[0].toUpperCase() + row.type.slice(1)}</strong><span>#{row.referenceNumber || row.reference || 'Account request'} · {formatDate(row.createdAt)}</span></div>
+              <div><strong>{row.type[0].toUpperCase() + row.type.slice(1)}</strong><span>{row.reference || 'Account request'} · {formatDate(row.createdAt)}</span></div>
               <div className="finance-row-side"><strong>{money(row.amount, currency)}</strong><span className={`finance-status finance-status--${row.status}`}>{row.status}</span></div>
+              <a className="finance-row-whatsapp" href={transactionWhatsAppLink({ user, transaction: row })} target="_blank" rel="noreferrer">WhatsApp</a>
             </article>
           ))}
         </section>
