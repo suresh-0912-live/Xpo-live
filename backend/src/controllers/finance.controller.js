@@ -54,6 +54,17 @@ function reference(prefix) {
   return `XPO-${prefix}-${suffix}`
 }
 
+// Generates a unique 5-digit display reference number (10000-99999).
+// Retries on collision since `referenceNumber` is @unique.
+async function referenceNumber(prisma) {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const n = 10000 + Math.floor(crypto.randomInt(90000))
+    const exists = await prisma.transaction.findUnique({ where: { referenceNumber: n }, select: { id: true } })
+    if (!exists) return n
+  }
+  throw ApiError.badRequest('Validation failed', ['could not generate a unique reference number'])
+}
+
 function mask(value) {
   return `****${String(value).slice(-4)}`
 }
@@ -128,6 +139,7 @@ export const createDeposit = asyncHandler(async (req, res) => {
   assertAmount(amount)
 
   const prisma = await getPrisma()
+  const refNumber = await referenceNumber(prisma)
   const transaction = await prisma.transaction.create({
     data: {
       userId: req.auth.sub,
@@ -136,6 +148,7 @@ export const createDeposit = asyncHandler(async (req, res) => {
       status: 'pending',
       method,
       reference: reference('DEP'),
+      referenceNumber: refNumber,
       details: { creditPolicy: 'manual_verification' },
     },
   })
@@ -181,6 +194,7 @@ export const createWithdrawal = asyncHandler(async (req, res) => {
 
   const prisma = await getPrisma()
   const userId = req.auth.sub
+  const refNumber = await referenceNumber(prisma)
   const masked = {
     accountHolder: bankDetails.accountHolder.trim(),
     bankName: bankDetails.bankName.trim(),
@@ -206,6 +220,7 @@ export const createWithdrawal = asyncHandler(async (req, res) => {
         status: 'pending',
         method: 'bank_transfer',
         reference: reference('WDR'),
+        referenceNumber: refNumber,
         details: masked,
       },
     })
