@@ -3,7 +3,7 @@
 // header. A 401 on an authenticated request clears the session and dispatch
 // `xpo-unauthorized`, which drops the app back to the login page.
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
 
 const TOKEN_KEY = 'xpo_token'
 const USER_KEY = 'xpo_user'
@@ -64,7 +64,10 @@ export async function request(path, { method = 'GET', body, auth = false } = {})
 
   let response
   try {
-    response = await fetch(`${API_BASE}/api${path}`, {
+    // Ensure /api appears exactly once, whether or not VITE_API_URL already
+    // ends with /api (e.g. https://xpo-live.onrender.com/api).
+    const base = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`
+    response = await fetch(`${base}${path}`, {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
