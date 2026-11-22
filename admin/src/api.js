@@ -1,7 +1,7 @@
 // Minimal API client for the admin panel. Token lives in localStorage and
 // is attached as a Bearer header. 401 responses trigger a logout event.
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
 
 const TOKEN_KEY = 'xpo_admin_token'
 
@@ -33,7 +33,10 @@ export async function api(path, { method = 'GET', body } = {}) {
 
   let response
   try {
-    response = await fetch(`${API_BASE}/api${path}`, {
+    // Ensure /api appears exactly once, whether or not VITE_API_URL already
+    // ends with /api (e.g. https://xpo-live.onrender.com/api).
+    const base = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`
+    response = await fetch(`${base}${path}`, {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -69,7 +72,8 @@ export async function apiBlob(path) {
 
   let response
   try {
-    response = await fetch(`${API_BASE}/api${path}`, { headers })
+    const base = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`
+    response = await fetch(`${base}${path}`, { headers })
   } catch {
     throw new ApiError(0, 'Cannot reach the backend — is it running?')
   }
