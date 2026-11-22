@@ -16,13 +16,25 @@ app.disable('x-powered-by')
 app.use(helmet())
 
 // CORS — allow only configured origins; requests without an Origin header
-// (curl, server-to-server, tests) are allowed.
+// (curl, server-to-server, tests) are allowed. Vercel preview deployments
+// (*.vercel.app) are matched by pattern, not wildcard, since credentials are
+// not used (Bearer token auth). The cors package handles OPTIONS preflight
+// automatically for allowed origins.
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || env.corsOrigins.includes('*') || env.corsOrigins.includes(origin)) {
+      if (!origin) return callback(null, true)
+
+      if (env.corsOrigins.includes('*') || env.corsOrigins.includes(origin)) {
         return callback(null, true)
       }
+
+      // Vercel preview deployments: allow *.vercel.app subdomains safely.
+      // Not a wildcard — only vercel.app subdomains match.
+      if (/^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)) {
+        return callback(null, true)
+      }
+
       callback(ApiError.forbidden(`Origin not allowed: ${origin}`))
     },
   }),

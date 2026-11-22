@@ -38,6 +38,10 @@ export default function Signup({ onSwitch, onSuccess }) {
       setError('Passwords do not match.')
       return
     }
+    if (!securityQuestion.trim()) {
+      setError('Please select a security question.')
+      return
+    }
 
     setBusy(true)
     try {
@@ -122,17 +126,20 @@ export default function Signup({ onSwitch, onSuccess }) {
 
           <label className="auth__field">
             <span>Security question</span>
-            <input
-              type="text"
+            <select
               name="securityQuestion"
               value={securityQuestion}
               onChange={(event) => setSecurityQuestion(event.target.value)}
-              placeholder="For example: What was your first school?"
               autoComplete="off"
-              minLength={5}
-              maxLength={250}
               required
-            />
+            >
+              <option value="" disabled>Select a security question</option>
+              <option value="What was the name of your first school?">What was the name of your first school?</option>
+              <option value="What is your childhood nickname?">What is your childhood nickname?</option>
+              <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+              <option value="What is the name of your favorite teacher?">What is the name of your favorite teacher?</option>
+              <option value="In which city were you born?">In which city were you born?</option>
+            </select>
           </label>
 
           <label className="auth__field">
