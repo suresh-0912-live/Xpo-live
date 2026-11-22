@@ -35,6 +35,19 @@ app.use('/api', apiLimiter)
 
 app.use('/api', routes)
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "XPO API is running"
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy"
+  });
+});
+
 app.use(notFound)
 app.use(errorHandler)
 
