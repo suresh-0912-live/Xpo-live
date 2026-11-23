@@ -48,6 +48,15 @@ model Wallet {
   updatedAt DateTime @updatedAt
 }
 
+// Permanent transaction reference sequence. Every deposit and withdrawal draws
+// from the SAME counter, so references are unique across both types and are
+// never reused (a row is created here only to hold the counter; the counter
+// value advances on every allocation and never retreats).
+model ReferenceCounter {
+  id        String @id @default("global") // single logical row
+  nextValue Int    @default(11111) // next reference number to hand out (11111–99999)
+}
+
 // Deposit / withdrawal ledger. `status` starts as `pending` and is only
 // moved to `completed` by a verified payment/processing flow (none connected
 // yet — the API never self-completes or self-credits).

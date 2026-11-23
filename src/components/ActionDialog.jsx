@@ -80,9 +80,14 @@ export default function ActionDialog({ type, user, onClose, onChanged, onNavigat
     setNotice('')
     try {
       const result = await createDeposit({ amount: value, method: DEPOSIT_METHODS[0] })
-      setNotice(result.message ?? 'Deposit request created.')
+      const ref = result.transaction?.reference
+      setNotice(result.message ?? `Deposit request created — Ref: ${ref}`)
       setSubmittedRequest(result.transaction)
       onChanged?.()
+      // Deposits redirect directly to WhatsApp — no intermediate confirmation.
+      // The request stays saved whether or not WhatsApp opens.
+      const link = transactionWhatsAppLink({ user, transaction: result.transaction })
+      window.open(link, '_blank', 'noopener')
     } catch (err) {
       setError(err.message || 'The deposit request failed.')
     } finally {
@@ -120,7 +125,8 @@ export default function ActionDialog({ type, user, onClose, onChanged, onNavigat
           bankName: bank.bankName.trim(),
         },
       })
-      setNotice(result.message ?? 'Withdrawal requested.')
+      const ref = result.transaction?.reference
+      setNotice(result.message ?? `Withdrawal requested — Ref: ${ref}`)
       setSubmittedRequest(result.transaction)
       onChanged?.()
     } catch (err) {
@@ -155,15 +161,24 @@ export default function ActionDialog({ type, user, onClose, onChanged, onNavigat
 
         {notice ? (
           <>
-            <p className="sheet__msg sheet__msg--ok" role="status">
-              {notice}
-            </p>
-            <div className="sheet__actions">
-              {submittedRequest && (
-                <a className="btn btn--ghost" href={transactionWhatsAppLink({ user, transaction: submittedRequest })} target="_blank" rel="noreferrer">
-                  Review in WhatsApp
+            <p className="sheet__msg sheet__msg--ok" role="status">{notice}</p>
+            {submittedRequest && type === 'deposit' && (
+              <>
+                <p className="sheet__msg sheet__msg--ok" role="status">
+                  If WhatsApp didn&apos;t open, your request is still saved —{' '}
+                  <strong>Ref: {submittedRequest.reference}</strong>.
+                </p>
+                <a
+                  className="btn btn--ghost"
+                  href={transactionWhatsAppLink({ user, transaction: submittedRequest })}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open WhatsApp
                 </a>
-              )}
+              </>
+            )}
+            <div className="sheet__actions">
               <button type="button" className="btn btn--primary" onClick={onClose}>
                 Done
               </button>

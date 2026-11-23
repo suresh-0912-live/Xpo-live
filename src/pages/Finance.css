@@ -203,3 +203,10 @@
   background: rgba(34, 197, 94, .12);
   color: #86efac;
 }
+
+/* Transaction status colours — depend on status AND type, never type alone. */
+.finance-status--warn {   /* pending / processing — yellow */ color: var(--warn); }
+.finance-status--pos {    /* completed deposit — green */      color: var(--pos); }
+.finance-status--neg {    /* completed withdrawal — red */     color: var(--neg); }
+.finance-status--reject { /* rejected / failed — orange */     color: var(--reject); }
+.finance-status--neutral { color: var(--muted); }

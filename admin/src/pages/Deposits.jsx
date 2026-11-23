@@ -188,7 +188,7 @@ export default function Deposits() {
                   <td>{row.method ? row.method.replace(/_/g, ' ') : '—'}</td>
                   <td>{formatMoney(row.amount)}</td>
                   <td>
-                    <StatusBadge status={row.status} />
+                    <StatusBadge status={row.status} type="deposit" />
                   </td>
                   <td>{formatDateTime(row.createdAt)}</td>
                   <td className="cell-small">
@@ -281,7 +281,7 @@ export default function Deposits() {
               <tr>
                 <td className="settings__label">Status</td>
                 <td>
-                  <StatusBadge status={selected.status} />
+                  <StatusBadge status={selected.status} type="deposit" />
                 </td>
               </tr>
               <tr>

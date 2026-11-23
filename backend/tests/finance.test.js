@@ -136,7 +136,12 @@ test('POST /api/deposits records a pending request and NEVER credits the balance
   assert.equal(data.status, 'pending')
   assert.equal(data.transaction.type, 'deposit')
   assert.equal(data.transaction.amount, 500)
-  assert.ok(data.transaction.reference?.startsWith('XPO-DEP-'))
+  assert.ok(/^\d{5}$/.test(data.transaction.reference), 'reference is exactly 5 digits')
+  assert.ok(
+    Number(data.transaction.reference) >= 11111 &&
+      Number(data.transaction.reference) <= 99999,
+    'reference is in the valid range',
+  )
 
   // No verified payment → balance must not move.
   const summary = await call('/dashboard/summary', { token: userToken })
@@ -235,7 +240,12 @@ test('POST /api/withdrawals reserves funds atomically and masks bank details', a
   assert.equal(status, 201)
   assert.equal(data.status, 'pending')
   assert.equal(data.transaction.type, 'withdrawal')
-  assert.ok(data.transaction.reference?.startsWith('XPO-WDR-'))
+  assert.ok(/^\d{5}$/.test(data.transaction.reference), 'reference is exactly 5 digits')
+  assert.ok(
+    Number(data.transaction.reference) >= 11111 &&
+      Number(data.transaction.reference) <= 99999,
+    'reference is in the valid range',
+  )
 
   // Masked only — the full account/routing numbers are never persisted.
   const stored = await prisma.transaction.findUnique({
@@ -264,3 +274,142 @@ test('POST /api/withdrawals reserves funds atomically and masks bank details', a
   })
   assert.equal(overdraw.status, 400)
 })
+
+// ---------------------------------------------- reference numbers ---
+
+test('deposit references are 5-digit, unique and sequential', async () => {
+  const first = await call('/deposits', {
+    method: 'POST',
+    token: userToken,
+    body: { amount: 10, method: 'bank_transfer' },
+  })
+  assert.equal(first.status, 201)
+  const second = await call('/deposits', {
+    method: 'POST',
+    token: userToken,
+    body: { amount: 20, method: 'bank_transfer' },
+  })
+  assert.equal(second.status, 201)
+
+  const ref1 = Number(first.data.transaction.reference)
+  const ref2 = Number(second.data.transaction.reference)
+  assert.ok(/^\d{5}$/.test(first.data.transaction.reference))
+  assert.ok(/^\d{5}$/.test(second.data.transaction.reference))
+  assert.equal(ref2, ref1 + 1, 'references advance by exactly one')
+})
+
+test('reference sequence is shared across deposits and withdrawals', async () => {
+  const prisma = await getPrisma()
+  await prisma.wallet.upsert({
+    where: { userId },
+    update: { balance: 1000 },
+    create: { userId, balance: 1000 },
+  })
+
+  const dep = await call('/deposits', {
+    method: 'POST',
+    token: userToken,
+    body: { amount: 5, method: 'bank_transfer' },
+  })
+  assert.equal(dep.status, 201)
+
+  const wdr = await call('/withdrawals', {
+    method: 'POST',
+    token: userToken,
+    body: {
+      amount: 5,
+      bankDetails: {
+        accountHolder: 'Finance Tester',
+        accountNumber: '1234567890',
+        routingCode: '12345',
+        bankName: 'Test Bank',
+      },
+    },
+  })
+  assert.equal(wdr.status, 201)
+  assert.equal(
+    Number(wdr.data.transaction.reference),
+    refNumber(dep) + 1,
+    'withdrawal continues the same sequence as deposits',
+  )
+})
+
+test('concurrent deposits never receive duplicate references', async () => {
+  const results = await Promise.all(
+    Array.from({ length: 5 }, () =>
+      call('/deposits', {
+        method: 'POST',
+        token: userToken,
+        body: { amount: 1, method: 'bank_transfer' },
+      }),
+    ),
+  )
+  assert.ok(results.every((r) => r.status === 201), 'every concurrent deposit succeeds')
+
+  const refs = results.map((r) => r.data.transaction.reference)
+  assert.ok(refs.every((ref) => /^\d{5}$/.test(ref)), 'every reference is 5 digits')
+  assert.equal(new Set(refs).size, refs.length, 'no duplicate references under concurrency')
+})
+
+test('failed withdrawal consumes its reference without creating a row', async () => {
+  const prisma = await getPrisma()
+  const before = await prisma.referenceCounter.findUnique({ where: { id: 'global' } })
+
+  const failed = await call('/withdrawals', {
+    method: 'POST',
+    token: userToken,
+    body: {
+      amount: 999999,
+      bankDetails: {
+        accountHolder: 'Finance Tester',
+        accountNumber: '1234567890',
+        routingCode: '12345',
+        bankName: 'Test Bank',
+      },
+    },
+  })
+  assert.equal(failed.status, 400, 'insufficient balance is rejected')
+
+  const after = await prisma.referenceCounter.findUnique({ where: { id: 'global' } })
+  assert.equal(
+    after.nextValue,
+    before.nextValue + 1,
+    'the reference was consumed even though creation failed — it is never reused',
+  )
+})
+
+test('sequence exhaustion stops generation at 99999 and never wraps to 11111', async () => {
+  const prisma = await getPrisma()
+  const original = await prisma.referenceCounter.findUnique({ where: { id: 'global' } })
+  try {
+    await prisma.referenceCounter.update({
+      where: { id: 'global' },
+      data: { nextValue: 99999 },
+    })
+
+    const last = await call('/deposits', {
+      method: 'POST',
+      token: userToken,
+      body: { amount: 1, method: 'bank_transfer' },
+    })
+    assert.equal(last.status, 201, '99999 is still issuable')
+    assert.equal(last.data.transaction.reference, '99999')
+
+    const exhausted = await call('/deposits', {
+      method: 'POST',
+      token: userToken,
+      body: { amount: 1, method: 'bank_transfer' },
+    })
+    assert.equal(exhausted.status, 400, 'generation stops at 99999')
+    assert.ok(exhausted.data.error, 'a clear error is returned')
+  } finally {
+    await prisma.referenceCounter.update({
+      where: { id: 'global' },
+      data: { nextValue: original.nextValue },
+    })
+  }
+})
+
+function refNumber(result) {
+  return Number(result.data.transaction.reference)
+}

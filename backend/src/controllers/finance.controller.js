@@ -13,7 +13,6 @@
 //     API never substitutes sample/demo values. DB failures propagate to the
 //     central error handler (500), so the UI can show an unavailable state.
 
-import crypto from 'node:crypto'
 import ApiError from '../utils/ApiError.js'
 import asyncHandler from '../utils/asyncHandler.js'
 import { getPrisma } from '../config/prisma.js'
@@ -49,13 +48,42 @@ function assertAmount(amount) {
   }
 }
 
-function reference(prefix) {
-  const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 10).toUpperCase()
-  return `XPO-${prefix}-${suffix}`
-}
-
 function mask(value) {
   return `****${String(value).slice(-4)}`
+}
+
+// ------------------------------------------------------------------ references
+// Permanent 5-digit reference numbers (11111–99999) shared by deposits and
+// withdrawals. Allocated from a single database-backed counter row under a
+// row lock, so concurrent requests can never collide. The allocation runs in
+// its OWN committed transaction: once a number is handed out it is consumed
+// forever, even if the transaction row it was meant for is never created.
+// Reference numbers are never reused, never random, never client-supplied,
+// and never change after a transaction exists.
+const REFERENCE_COUNTER_ID = 'global'
+const REFERENCE_MIN = 11111
+const REFERENCE_MAX = 99999
+
+async function allocateReference() {
+  const prisma = await getPrisma()
+  // `UPDATE ... SET nextValue = nextValue + 1` takes a row lock, so concurrent
+  // allocations serialize inside the database. We commit immediately so the
+  // number stays consumed no matter what happens downstream.
+  const counter = await prisma.referenceCounter.update({
+    where: { id: REFERENCE_COUNTER_ID },
+    data: { nextValue: { increment: 1 } },
+    select: { nextValue: true },
+  })
+  // The update returns the *incremented* value, so the number we just handed
+  // out is one less.
+  const reference = String(counter.nextValue - 1)
+  const value = Number(reference)
+  if (!Number.isFinite(value) || value < REFERENCE_MIN || value > REFERENCE_MAX) {
+    throw ApiError.badRequest('Reference sequence exhausted', [
+      `No reference numbers remain in the valid range (${REFERENCE_MIN}–${REFERENCE_MAX}).`,
+    ])
+  }
+  return reference
 }
 
 // GET /api/dashboard/summary — cash, invested, today's P/L and total P/L
@@ -135,7 +163,7 @@ export const createDeposit = asyncHandler(async (req, res) => {
       amount: money(amount),
       status: 'pending',
       method,
-      reference: reference('DEP'),
+      reference: await allocateReference(),
       details: { creditPolicy: 'manual_verification' },
     },
   })
@@ -181,6 +209,9 @@ export const createWithdrawal = asyncHandler(async (req, res) => {
 
   const prisma = await getPrisma()
   const userId = req.auth.sub
+  // Allocate (and permanently consume) the reference before attempting the
+  // reservation, so a failed withdrawal never frees its number for reuse.
+  const reference = await allocateReference()
   const masked = {
     accountHolder: bankDetails.accountHolder.trim(),
     bankName: bankDetails.bankName.trim(),
@@ -205,7 +236,7 @@ export const createWithdrawal = asyncHandler(async (req, res) => {
         amount: money(amount),
         status: 'pending',
         method: 'bank_transfer',
-        reference: reference('WDR'),
+        reference,
         details: masked,
       },
     })

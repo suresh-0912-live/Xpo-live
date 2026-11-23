@@ -225,7 +225,7 @@ export default function Transactions() {
                   <td>{row.type}</td>
                   <td>{formatMoney(row.amount)}</td>
                   <td>
-                    <StatusBadge status={row.status} />
+                    <StatusBadge status={row.status} type={row.type} />
                   </td>
                   <td className="cell-mono">{row.reference || '—'}</td>
                   <td>{formatDateTime(row.createdAt)}</td>
@@ -297,7 +297,7 @@ export default function Transactions() {
               <tr>
                 <td className="settings__label">Status</td>
                 <td>
-                  <StatusBadge status={selected.status} />
+                  <StatusBadge status={selected.status} type={selected.type} />
                 </td>
               </tr>
               <tr>

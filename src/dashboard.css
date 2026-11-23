@@ -631,6 +631,18 @@
   border: 1px solid rgba(255, 59, 92, 0.24);
 }
 
+.row__ico--warn {
+  color: var(--warn);
+  background: rgba(245, 185, 68, 0.14);
+  border: 1px solid rgba(245, 185, 68, 0.24);
+}
+
+.row__ico--reject {
+  color: var(--reject);
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.24);
+}
+
 .row__body {
   min-width: 0;
   flex: 1;

@@ -9,6 +9,10 @@ import './Finance.css'
 
 const PANELS = ['wallet', 'deposits', 'withdrawals']
 
+const EMPTY_BANK = { accountHolder: '', accountNumber: '', routingCode: '', bankName: '' }
+
+const METHOD_LABELS = { bank_transfer: 'Bank Transfer' }
+
 function money(value, currency) {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -56,6 +60,27 @@ export default function Finance({ onNavigate, user }) {
     return () => window.removeEventListener('focus', load)
   }, [load])
 
+  // Status colour depends on status AND transaction type — never on type alone.
+  function txTone(type, status) {
+    switch (status) {
+      case 'pending':
+      case 'processing':
+        return 'warn' // yellow — still awaiting approval
+      case 'completed':
+        return type === 'withdrawal' ? 'neg' : 'pos' // withdrawal = red, deposit = green
+      case 'rejected':
+      case 'failed':
+        return 'reject' // orange
+      default:
+        return 'neutral'
+    }
+  }
+
+  function statusLabel(status) {
+    const labels = { pending: 'Pending', processing: 'Processing', completed: 'Completed', failed: 'Failed', rejected: 'Rejected' }
+    return labels[status] || status
+  }
+
   async function submit(event) {
     event.preventDefault()
     setSubmitting(true)
@@ -65,14 +90,21 @@ export default function Finance({ onNavigate, user }) {
       const value = Number(amount)
       if (panel === 'deposits') {
         const result = await createDeposit({ amount: value, method: DEPOSIT_METHODS[0] })
-        setNotice(result.message || 'Deposit request submitted.')
+        const ref = result.transaction?.reference
+        setNotice(result.message || `Deposit request created — Ref: ${ref}`)
         setSubmittedRequest(result.transaction)
+        // Deposits redirect directly to WhatsApp — no confirmation modal first.
+        const link = transactionWhatsAppLink({ user, transaction: result.transaction })
+        window.open(link, '_blank', 'noopener')
       } else {
         const result = await createWithdrawal({ amount: value, bankDetails: bank })
-        setNotice(result.message || 'Withdrawal request submitted.')
+        const ref = result.transaction?.reference
+        setNotice(result.message || `Withdrawal requested — Ref: ${ref}`)
         setSubmittedRequest(result.transaction)
+        // Withdrawals stay inside the app — no WhatsApp redirect.
       }
       setAmount('')
+      setBank(EMPTY_BANK)
       await load()
     } catch (err) {
       setError(err.message || 'Could not submit your request.')
@@ -122,16 +154,6 @@ export default function Finance({ onNavigate, user }) {
           </section>
         )}
         {notice && <p className="finance-notice" role="status">{notice}</p>}
-        {submittedRequest && (
-          <a
-            className="finance-whatsapp"
-            href={transactionWhatsAppLink({ user, transaction: submittedRequest })}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Review request in WhatsApp
-          </a>
-        )}
 
         {panel !== 'wallet' && (
           <form className="finance-form" onSubmit={submit}>
@@ -168,13 +190,21 @@ export default function Finance({ onNavigate, user }) {
             <button type="button" onClick={() => onNavigate?.('transactions')}>All transactions</button>
           </div>
           {!loading && !error && rows.length === 0 && <p className="finance-state">No {panel === 'wallet' ? 'wallet activity' : panel} yet.</p>}
-          {rows.map((row) => (
-            <article className="finance-row" key={row.id}>
-              <div><strong>{row.type[0].toUpperCase() + row.type.slice(1)}</strong><span>{row.reference || 'Account request'} · {formatDate(row.createdAt)}</span></div>
-              <div className="finance-row-side"><strong>{money(row.amount, currency)}</strong><span className={`finance-status finance-status--${row.status}`}>{row.status}</span></div>
-              <a className="finance-row-whatsapp" href={transactionWhatsAppLink({ user, transaction: row })} target="_blank" rel="noreferrer">WhatsApp</a>
-            </article>
-          ))}
+          {rows.map((row) => {
+            const tone = txTone(row.type, row.status)
+            return (
+              <article className="finance-row" key={row.id}>
+                <div>
+                  <strong>{row.type[0].toUpperCase() + row.type.slice(1)}</strong>
+                  <span>Ref: {row.reference || '—'} · {METHOD_LABELS[row.method] || row.method || '—'} · {formatDate(row.createdAt)}</span>
+                </div>
+                <div className="finance-row-side">
+                  <strong>{money(row.amount, currency)}</strong>
+                  <span className={`finance-status finance-status--${tone}`}>{statusLabel(row.status)}</span>
+                </div>
+              </article>
+            )
+          })}
         </section>
       </main>
       <BottomNavigation items={navItemsFor('more')} onSelect={onNavigate} />

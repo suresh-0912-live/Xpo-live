@@ -13,6 +13,7 @@
   --ok: #18a05a;
   --warn: #d97706;
   --off: #dc2626;
+  --reject: #f59e0b;
   --radius: 12px;
 
   /* ---- Mobile design system (320–430px) — additive tokens ----
@@ -1027,6 +1028,11 @@ textarea.input {
 .badge--off {
   background: #fde8e8;
   color: var(--off);
+}
+
+.badge--reject {
+  background: #fdf3e3;
+  color: var(--reject);
 }
 
 .badge--neutral {

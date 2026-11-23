@@ -78,8 +78,8 @@ function pctStr(value) {
 }
 
 const TX_META = {
-  deposit: { title: 'Deposit', icon: 'download', tone: 'pos', sign: '+' },
-  withdrawal: { title: 'Withdrawal', icon: 'upload', tone: 'neg', sign: '-' },
+  deposit: { title: 'Deposit', icon: 'download', sign: '+' },
+  withdrawal: { title: 'Withdrawal', icon: 'upload', sign: '-' },
 }
 const METHOD_LABELS = { bank_transfer: 'Bank Transfer' }
 const STATUS_LABELS = {
@@ -88,6 +88,24 @@ const STATUS_LABELS = {
   completed: 'Completed',
   failed: 'Failed',
   rejected: 'Rejected',
+}
+
+// Status colour depends on status AND transaction type — never on type alone.
+// Pending/processing = yellow; completed deposit = green; completed withdrawal
+// = red; rejected/failed = orange.
+function txTone(type, status) {
+  switch (status) {
+    case 'pending':
+    case 'processing':
+      return 'warn'
+    case 'completed':
+      return type === 'withdrawal' ? 'neg' : 'pos'
+    case 'rejected':
+    case 'failed':
+      return 'reject'
+    default:
+      return 'blue'
+  }
 }
 
 function formatTxDate(iso) {
@@ -105,17 +123,18 @@ function formatTxDate(iso) {
 }
 
 function toTransactionRow(tx) {
-  const meta = TX_META[tx.type] ?? { title: tx.type, icon: 'bars', tone: 'blue', sign: '+' }
+  const meta = TX_META[tx.type] ?? { title: tx.type, icon: 'bars', sign: '+' }
   const method = METHOD_LABELS[tx.method] ?? tx.method ?? 'Account'
   const status = STATUS_LABELS[tx.status] ?? tx.status ?? ''
+  const reference = tx.reference ?? '—'
   return {
     id: tx.id,
     title: meta.title,
-    subtitle: `${method} · ${status}`,
+    subtitle: `Ref: ${reference} · ${method} · ${status}`,
     amount: `${meta.sign}${money(tx.amount)}`,
     date: formatTxDate(tx.createdAt),
     icon: meta.icon,
-    tone: meta.tone,
+    tone: txTone(tx.type, tx.status),
   }
 }
 

@@ -186,7 +186,7 @@ export default function Withdrawals() {
                   <td>{formatMoney(row.amount)}</td>
                   <td className="cell-mono">{row.details?.accountNumberMasked || '—'}</td>
                   <td>
-                    <StatusBadge status={row.status} />
+                    <StatusBadge status={row.status} type="withdrawal" />
                   </td>
                   <td>{formatDateTime(row.createdAt)}</td>
                   <td className="cell-small">
@@ -277,7 +277,7 @@ export default function Withdrawals() {
               <tr>
                 <td className="settings__label">Status</td>
                 <td>
-                  <StatusBadge status={selected.status} />
+                  <StatusBadge status={selected.status} type="withdrawal" />
                 </td>
               </tr>
               <tr>

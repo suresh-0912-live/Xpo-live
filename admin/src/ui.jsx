@@ -16,13 +16,23 @@ export function PageHeader({ title, subtitle, action }) {
   )
 }
 
-export function StatusBadge({ status }) {
+// Transaction status badge. Colour depends on status AND transaction type:
+//   pending / processing  → yellow  (warn)
+//   completed deposit     → green   (ok)
+//   completed withdrawal  → red     (off)
+//   rejected / failed     → orange  (reject)
+export function StatusBadge({ status, type }) {
   const label = String(status ?? 'unknown')
-  const tone =
-    ['ok', 'active', 'up', 'true'].includes(label) ? 'ok'
-    : ['degraded', 'warn', 'warning', 'pending', 'processing'].includes(label) ? 'warn'
-    : ['not_configured', 'off', 'down', 'suspended', 'error', 'failed', 'rejected'].includes(label) ? 'off'
-    : 'neutral'
+  let tone
+  if (['pending', 'processing'].includes(label)) {
+    tone = 'warn'
+  } else if (label === 'completed') {
+    tone = type === 'withdrawal' ? 'off' : 'ok'
+  } else if (['rejected', 'failed'].includes(label)) {
+    tone = 'reject'
+  } else {
+    tone = ['ok', 'active', 'up', 'true'].includes(label) ? 'ok' : 'neutral'
+  }
   return <span className={`badge badge--${tone}`}>{label.replace(/_/g, ' ')}</span>
 }
 
