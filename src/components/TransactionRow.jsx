@@ -1,7 +1,7 @@
 import { UiIcon } from './Icons.jsx'
 
-export default function TransactionRow({ title, subtitle, amount, date, icon, tone }) {
-  const sign = amount.startsWith('-') ? 'neg' : 'pos'
+export default function TransactionRow({ title, subtitle, amount, date, icon, tone, status }) {
+  const statusLabel = status ? status.charAt(0).toUpperCase() + status.slice(1) : ''
 
   return (
     <li className="row">
@@ -15,7 +15,10 @@ export default function TransactionRow({ title, subtitle, amount, date, icon, to
       </div>
 
       <div className="row__right">
-        <p className={`row__value ${sign}`}>{amount}</p>
+        <p className={`row__value ${tone}`}>{amount}</p>
+        {statusLabel && (
+          <p className={`row__sub row__sub--status row__sub--${tone}`}>{statusLabel}</p>
+        )}
         <p className="row__sub">{date}</p>
       </div>
     </li>

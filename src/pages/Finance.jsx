@@ -199,7 +199,7 @@ export default function Finance({ onNavigate, user }) {
                   <span>Ref: {row.reference || '—'} · {METHOD_LABELS[row.method] || row.method || '—'} · {formatDate(row.createdAt)}</span>
                 </div>
                 <div className="finance-row-side">
-                  <strong>{money(row.amount, currency)}</strong>
+                  <strong className={`finance-status--${tone}`}>{money(row.amount, currency)}</strong>
                   <span className={`finance-status finance-status--${tone}`}>{statusLabel(row.status)}</span>
                 </div>
               </article>

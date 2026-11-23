@@ -701,9 +701,30 @@
   color: var(--neg);
 }
 
+.warn {
+  color: var(--warn);
+}
+
+.reject {
+  color: var(--reject);
+}
+
 .muted {
   color: var(--muted-dim);
 }
+
+/* Transaction status text colour — follows status + type, not type alone. */
+.row__sub--status {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.row__sub--status.row__sub--pos { color: var(--pos); }
+.row__sub--status.row__sub--neg { color: var(--neg); }
+.row__sub--status.row__sub--warn { color: var(--warn); }
+.row__sub--status.row__sub--reject { color: var(--reject); }
+.row__sub--status.row__sub--blue { color: var(--muted-dim); }
 
 .spark-pos {
   fill: none;

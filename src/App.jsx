@@ -134,6 +134,7 @@ function toTransactionRow(tx) {
     date: formatTxDate(tx.createdAt),
     icon: meta.icon,
     tone: txTone(tx.type, tx.status),
+    status: tx.status,
   }
 }
 
