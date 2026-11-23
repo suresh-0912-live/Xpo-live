@@ -114,7 +114,6 @@ function formatTxDate(iso) {
   const dayDiff = Math.round((midnight(new Date()) - midnight(date)) / 86_400_000)
   const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
   if (dayDiff === 0) return `Today, ${time}`
-    if (session.status !== 'signed-in' || !['home', 'transactions'].includes(view)) return undefined
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
